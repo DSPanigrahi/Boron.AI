@@ -2,7 +2,16 @@ import streamlit as st
 from google import genai
 from langchain_community.tools.tavily_search import TavilySearchResults
 import uuid
-
+# --- HIDE STREAMLIT BRANDING ---
+hide_st_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            header {visibility: hidden;}
+            [data-testid="stToolbar"] {visibility: hidden !important;}
+            </style>
+            """
+st.markdown(hide_st_style, unsafe_allow_html=True)
 # --- 1. BRANDING & SETUP ---
 st.set_page_config(page_title="Boron.AI", page_icon="🧪", layout="wide")
 
