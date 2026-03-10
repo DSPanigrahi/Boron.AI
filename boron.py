@@ -3,17 +3,29 @@ from google import genai
 from langchain_community.tools.tavily_search import TavilySearchResults
 import uuid
 # --- HIDE STREAMLIT BRANDING ---
+# --- 1. BRANDING & BRAND-REMOVAL ---
+st.set_page_config(page_title="Boron.AI", page_icon="🧪", layout="wide")
+
+# This CSS block is more aggressive to ensure the footer GONE
 hide_st_style = """
             <style>
+            /* Hide the hamburger menu */
             #MainMenu {visibility: hidden;}
+            /* Hide the footer "Made with Streamlit" */
             footer {visibility: hidden;}
+            /* Hide the header bar and the "Deploy" button */
             header {visibility: hidden;}
+            /* Hide the top decoration bar (red line) */
+            [data-testid="stDecoration"] {display: none;}
+            /* Hide the status widget (running animation) */
+            [data-testid="stStatusWidget"] {display: none;}
+            /* Remove top padding so AI content starts at the very top */
+            .block-container {padding-top: 0rem; padding-bottom: 0rem;}
+            /* Hide the toolbar (presents/fullscreen/etc) */
             [data-testid="stToolbar"] {visibility: hidden !important;}
             </style>
             """
 st.markdown(hide_st_style, unsafe_allow_html=True)
-# --- 1. BRANDING & SETUP ---
-st.set_page_config(page_title="Boron.AI", page_icon="🧪", layout="wide")
 
 # --- 2. KEYS (Use st.secrets for production!) ---
 GEMINI_KEY = "KEY"
