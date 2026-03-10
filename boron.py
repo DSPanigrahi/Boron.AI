@@ -52,7 +52,3 @@ if user_input := st.chat_input("Boron is steady. Ask me anything."):
             st.session_state.messages.append({"role": "assistant", "content": answer})
         except Exception as e:
             st.error(f"System Error: {e}")
-streamlit
-langchain-google-genai
-langchain-community
-tavily-python
