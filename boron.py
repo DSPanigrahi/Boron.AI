@@ -53,7 +53,6 @@ if user_input := st.chat_input("Boron is steady. Ask me anything."):
         except Exception as e:
             st.error(f"System Error: {e}")
 streamlit
-langchain>=1.0.0
 langchain-google-genai
 langchain-community
 tavily-python
