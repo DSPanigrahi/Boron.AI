@@ -33,7 +33,6 @@ search_results = search_tool.run({"query": user_text})
     USER QUESTION: {user_text}
     
     INSTRUCTIONS: Answer as Boron.AI. Be logical, professional, and use the web info provided.
-    """
     
     response = client.models.generate_content(
         model="gemini-2.5-flash",
