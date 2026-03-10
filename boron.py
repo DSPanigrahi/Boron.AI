@@ -7,8 +7,8 @@ import uuid
 st.set_page_config(page_title="Boron.AI", page_icon="🧪", layout="wide")
 
 # --- 2. KEYS (Use st.secrets for production!) ---
-GEMINI_KEY = "AIzaSyBI8QnrK56pPjj70p11wrdpKOIAnTwaKrg"
-TAVILY_KEY = "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"
+GEMINI_KEY = "KEY"
+TAVILY_KEY = "KEY"
 
 client = genai.Client(api_key=GEMINI_KEY)
 search_tool = TavilySearchResults(tavily_api_key=TAVILY_KEY)
