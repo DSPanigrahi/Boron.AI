@@ -17,7 +17,8 @@ search_tool = TavilySearchResults(tavily_api_key=TAVILY_KEY)
 
 def get_boron_response(user_text):
     # First, we check the web
-    search_results = search_tool.run(user_text)
+    # We wrap the query in a dictionary to satisfy the new 2026 Tavily requirements
+search_results = search_tool.run({"query": user_text})
     
     # Then, we give that info to Gemini to explain it
     prompt = f"""
