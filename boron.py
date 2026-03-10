@@ -35,6 +35,32 @@ def get_boron_response(user_text):
     return response.text
 # --- 4. SIDEBAR HISTORY ---
 with st.sidebar:
+    st.markdown("---")
+    if st.button("📝 Create Study Guide"):
+        if st.session_state.messages:
+            # Combine all messages into one big text block
+            context = "\n".join([f"{m['role']}: {m['content']}" for m in st.session_state.messages])
+            
+            # Send a special prompt to Gemini
+            guide_prompt = f"Based on this research: {context}. Create a structured study guide. Include: 1. Main Concepts, 2. Important Terms, 3. Summary of Findings."
+            
+            response = client.models.generate_content(
+                model="gemini-3.1-flash-lite-preview",
+                contents=[guide_prompt]
+            )
+            
+            # Show the guide in a popup (expander)
+            st.session_state.study_guide = response.text
+        else:
+            st.warning("Ask some questions first to build a history!")
+
+# Display the guide if it exists
+if "study_guide" in st.session_state:
+    with st.expander("🎓 Your Generated Study Guide", expanded=True):
+        st.write(st.session_state.study_guide)
+        if st.button("Close Guide"):
+            del st.session_state.study_guide
+            st.rerun()
     st.title("📚 Research History")
     if st.button("Clear Conversation"):
         st.session_state.messages = []
