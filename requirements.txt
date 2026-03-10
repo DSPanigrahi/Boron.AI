@@ -1,0 +1,5 @@
+streamlit
+langchain>=1.0.0
+langchain-google-genai
+langchain-community
+tavily-python
