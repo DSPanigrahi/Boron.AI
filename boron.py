@@ -15,7 +15,7 @@ TAVILY_KEY = st.secrets["TAVILY_API_KEY"]
 client = genai.Client(api_key=GEMINI_KEY)
 search_tool = TavilySearchResults(tavily_api_key=TAVILY_KEY)
 
-def get_boron_response(user_text):
+    def get_boron_response(user_text):
     # First, we check the web
     # We wrap the query in a dictionary to satisfy the new 2026 Tavily requirements
 search_results = search_tool.run({"query": user_text})
