@@ -33,7 +33,19 @@ def get_boron_response(user_text):
         contents=prompt # This is now explicitly defined so it CANNOT be empty
     )
     return response.text
-
+# --- 4. SIDEBAR HISTORY ---
+with st.sidebar:
+    st.title("📚 Research History")
+    if st.button("Clear Conversation"):
+        st.session_state.messages = []
+        st.rerun()
+    
+    st.markdown("---")
+    # Display a list of your questions as a quick reference
+    for i, msg in enumerate(st.session_state.messages):
+        if msg["role"] == "user":
+            # Show the first 30 characters of each question
+            st.write(f"🔍 {msg['content'][:30]}...")
 # --- 4. CHAT INTERFACE ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
