@@ -90,3 +90,27 @@ if user_input := st.chat_input("Boron is steady. Ask me anything."):
             st.session_state.messages.append({"role": "assistant", "content": answer})
         except Exception as e:
             st.error(f"System Error: {e}")
+
+with st.chat_message("assistant"):
+        try:
+            answer = get_boron_response(user_input)
+            st.write(answer)
+            st.session_state.messages.append({"role": "assistant", "content": answer})
+        except Exception as e:
+            st.error(f"Operational Error: {e}")
+
+# --- 5. THE STUDY GUIDE (PLACED AT BOTTOM) ---
+# Putting this here ensures it appears AFTER the latest chat messages
+if "study_guide" in st.session_state:
+    st.divider() # Adds a nice visual line
+    st.subheader("🎓 Your Generated Study Guide")
+    st.markdown(st.session_state.study_guide)
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Download as Text"):
+            st.download_button("Click to Download", st.session_state.study_guide, file_name="study_guide.txt")
+    with col2:
+        if st.button("Close Guide"):
+            del st.session_state.study_guide
+            st.rerun()
