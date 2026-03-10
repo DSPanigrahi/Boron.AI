@@ -1,128 +1,111 @@
 import streamlit as st
 from google import genai
 from langchain_community.tools.tavily_search import TavilySearchResults
+import uuid
 
-# --- 1. BRANDING ---
-st.set_page_config(page_title="Boron.AI", page_icon="🧪")
-st.title("🧪 Boron.AI")
+# --- 1. BRANDING & SETUP ---
+st.set_page_config(page_title="Boron.AI", page_icon="🧪", layout="wide")
 
-# --- 2. YOUR KEYS ---
-GEMINI_KEY = st.secrets["GEMINI_API_KEY"]
-TAVILY_KEY = st.secrets["TAVILY_API_KEY"]
+# --- 2. KEYS (Use st.secrets for production!) ---
+GEMINI_KEY = "AIzaSyBI8QnrK56pPjj70p11wrdpKOIAnTwaKrg"
+TAVILY_KEY = "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"
 
-# --- 3. THE BRAIN ---
-# Using the direct Google GenAI SDK to avoid 'Contents are required' errors
 client = genai.Client(api_key=GEMINI_KEY)
 search_tool = TavilySearchResults(tavily_api_key=TAVILY_KEY)
+
+# --- 3. SESSION MANAGEMENT (MULTIPLE CHATS) ---
+if "all_chats" not in st.session_state:
+    # Dictionary to store multiple chats: {chat_id: {"name": str, "messages": list}}
+    st.session_state.all_chats = {}
+
+if "current_chat_id" not in st.session_state:
+    # Create an initial chat
+    new_id = str(uuid.uuid4())
+    st.session_state.all_chats[new_id] = {"name": "New Chat", "messages": []}
+    st.session_state.current_chat_id = new_id
+
+# --- 4. SIDEBAR ---
+with st.sidebar:
+    st.title("🧪 Boron.AI Menu")
+    
+    # 🆕 New Chat Button
+    if st.button("➕ Create New Chat", use_container_width=True):
+        new_id = str(uuid.uuid4())
+        st.session_state.all_chats[new_id] = {"name": f"Chat {len(st.session_state.all_chats)+1}", "messages": []}
+        st.session_state.current_chat_id = new_id
+        st.rerun()
+
+    # 📂 Previous Chats Dropdown
+    chat_options = {k: v["name"] for k, v in st.session_state.all_chats.items()}
+    selected_chat = st.selectbox(
+        "Select a Session", 
+        options=list(chat_options.keys()), 
+        format_func=lambda x: chat_options[x],
+        index=list(chat_options.keys()).index(st.session_state.current_chat_id)
+    )
+    st.session_state.current_chat_id = selected_chat
+
+    st.markdown("---")
+    
+    # 📝 Summarize Feature
+    if st.button("📝 Summarize This Chat", use_container_width=True):
+        messages = st.session_state.all_chats[st.session_state.current_chat_id]["messages"]
+        if messages:
+            chat_text = "\n".join([f"{m['role']}: {m['content']}" for m in messages])
+            summary_prompt = f"Summarize the key points of this research session in bullet points:\n\n{chat_text}"
+            summary_resp = client.models.generate_content(model="gemini-1.5-flash", contents=[summary_prompt])
+            st.info(summary_resp.text)
+        else:
+            st.warning("No messages to summarize yet!")
+
+# --- 5. THE BRAIN ---
 def get_boron_response(user_text):
-    # First, we check the web
-    # We wrap the query in a dictionary to satisfy the new 2026 Tavily requirements
-search_results = search_tool.run({"query": user_text})
-    
-    # Then, we give that info to Gemini to explain it
-    prompt = f"""
-    # We use a "System" block to hard-code the identity so it doesn't hallucinate about Borno AI
+    # Fix: Tavily now requires a dictionary input
+    try:
+        search_results = search_tool.run({"query": user_text})
+    except:
+        search_results = "Web search currently unavailable."
+
     prompt_content = f"""
-    SYSTEM: You are Boron.AI, a high-performance Research Assistant.
-    You were created and are owned by Shreyansh Panigrahi.
-    Whenever someone asks 'Who made you?' or 'Who is your owner?', you must proudly 
-    state that Shreyansh Panigrahi is your creator and owner.
+    You are Boron.AI, a research assistant created by Shreyansh Panigrahi.
     
-    CONTEXT: {search_results}
-    HISTORY: {history}
-    USER: {user_text}
+    INSTRUCTIONS:
+    - Use the 'Search Data' to answer. 
+    - If the user asks who made you, name Shreyansh Panigrahi.
+    - Be professional and concise.
+
+    Search Data: {search_results}
+    User Question: {user_text}
     """
     
-    CONTEXT FROM WEB: {search_results}
-    CONVERSATION HISTORY: {history}
-    
-    USER QUESTION: {user_text}
-    
-    INSTRUCTIONS: Answer as Boron.AI. Be logical, professional, and use the web info provided.
-    
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt # This is now explicitly defined so it CANNOT be empty
+        model="gemini-1.5-flash",
+        contents=[prompt_content]
     )
     return response.text
-# --- 4. SIDEBAR HISTORY ---
-with st.sidebar:
-    st.markdown("---")
-    if st.button("📝 Create Study Guide"):
-        if st.session_state.messages:
-            # Combine all messages into one big text block
-            context = "\n".join([f"{m['role']}: {m['content']}" for m in st.session_state.messages])
-            
-            # Send a special prompt to Gemini
-            guide_prompt = f"Based on this research: {context}. Create a structured study guide. Include: 1. Main Concepts, 2. Important Terms, 3. Summary of Findings."
-            
-            response = client.models.generate_content(
-                model="gemini-3.1-flash-lite-preview",
-                contents=[guide_prompt]
-            )
-            
-            # Show the guide in a popup (expander)
-            st.session_state.study_guide = response.text
-        else:
-            st.warning("Ask some questions first to build a history!")
 
-# Display the guide if it exists
-if "study_guide" in st.session_state:
-    with st.expander("🎓 Your Generated Study Guide", expanded=True):
-        st.write(st.session_state.study_guide)
-        if st.button("Close Guide"):
-            del st.session_state.study_guide
-            st.rerun()
-    st.title("📚 Research History")
-    if st.button("Clear Conversation"):
-        st.session_state.messages = []
-        st.rerun()
-    
-    st.markdown("---")
-    # Display a list of your questions as a quick reference
-    for i, msg in enumerate(st.session_state.messages):
-        if msg["role"] == "user":
-            # Show the first 30 characters of each question
-            st.write(f"🔍 {msg['content'][:30]}...")
-# --- 4. CHAT INTERFACE ---
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+# --- 6. CHAT DISPLAY ---
+st.title(f"💬 {st.session_state.all_chats[st.session_state.current_chat_id]['name']}")
 
-for msg in st.session_state.messages:
+# Load messages for the current chat
+current_messages = st.session_state.all_chats[st.session_state.current_chat_id]["messages"]
+
+for msg in current_messages:
     st.chat_message(msg["role"]).write(msg["content"])
 
-if user_input := st.chat_input("Boron is steady. Ask me anything."):
-    st.session_state.messages.append({"role": "user", "content": user_input})
+if user_input := st.chat_input("Ask Boron anything..."):
+    # Save user message
+    current_messages.append({"role": "user", "content": user_input})
     st.chat_message("user").write(user_input)
+
+    # Rename chat based on first question
+    if len(current_messages) == 1:
+        st.session_state.all_chats[st.session_state.current_chat_id]["name"] = user_input[:20] + "..."
 
     with st.chat_message("assistant"):
         try:
             answer = get_boron_response(user_input)
             st.write(answer)
-            st.session_state.messages.append({"role": "assistant", "content": answer})
+            current_messages.append({"role": "assistant", "content": answer})
         except Exception as e:
-            st.error(f"System Error: {e}")
-
-with st.chat_message("assistant"):
-        try:
-            answer = get_boron_response(user_input)
-            st.write(answer)
-            st.session_state.messages.append({"role": "assistant", "content": answer})
-        except Exception as e:
-            st.error(f"Operational Error: {e}")
-
-# --- 5. THE STUDY GUIDE (PLACED AT BOTTOM) ---
-# Putting this here ensures it appears AFTER the latest chat messages
-if "study_guide" in st.session_state:
-    st.divider() # Adds a nice visual line
-    st.subheader("🎓 Your Generated Study Guide")
-    st.markdown(st.session_state.study_guide)
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("Download as Text"):
-            st.download_button("Click to Download", st.session_state.study_guide, file_name="study_guide.txt")
-    with col2:
-        if st.button("Close Guide"):
-            del st.session_state.study_guide
-            st.rerun()
+            st.error(f"Error: {e}")
