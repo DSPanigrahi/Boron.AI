@@ -11,7 +11,7 @@ hide_st_style = """
             <style>
             /* Hide the hamburger menu */
             #MainMenu {visibility: hidden;}
-            /* Hide the footer "Made with Streamlit" */
+            /* Hide the footer "Hosted with Streamlit" */
             footer {visibility: hidden;}
             /* Hide the header bar and the "Deploy" button */
             header {visibility: hidden;}
