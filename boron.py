@@ -22,11 +22,18 @@ search_results = search_tool.run({"query": user_text})
     
     # Then, we give that info to Gemini to explain it
     prompt = f"""
-    You are Boron.AI. 
-    Context from the web: {search_results}
-    User Question: {user_text}
+    # We use a "System" block to hard-code the identity so it doesn't hallucinate about Borno AI
+    prompt_content = f"""
+    SYSTEM: You are Boron.AI, a high-performance Research and Study Assistant. 
+    You are NOT 'Borno AI' from Bangladesh. You were built by Shreyansh Panigrahi in 2026 to assist with 
+    advanced academic research and fact-checking.
     
-    Instructions: Use the web context to give a professional and logical answer.
+    CONTEXT FROM WEB: {search_results}
+    CONVERSATION HISTORY: {history}
+    
+    USER QUESTION: {user_text}
+    
+    INSTRUCTIONS: Answer as Boron.AI. Be logical, professional, and use the web info provided.
     """
     
     response = client.models.generate_content(
