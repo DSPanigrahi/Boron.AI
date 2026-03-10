@@ -26,7 +26,7 @@ if "current_chat_id" not in st.session_state:
 
 # --- 4. SIDEBAR ---
 with st.sidebar:
-    st.title("🧪 Boron.AI Menu")
+    st.title("🧪 Boron.AI")
     
     # 🆕 New Chat Button
     if st.button("➕ Create New Chat", use_container_width=True):
@@ -79,7 +79,7 @@ def get_boron_response(user_text):
     """
     
     response = client.models.generate_content(
-        model="gemini-1.5-flash",
+        model="gemini-2.5-flash",
         contents=[prompt_content]
     )
     return response.text
