@@ -28,8 +28,8 @@ hide_st_style = """
 st.markdown(hide_st_style, unsafe_allow_html=True)
 
 # --- 2. KEYS (Use st.secrets for production!) ---
-GEMINI_KEY = "KEY"
-TAVILY_KEY = "KEY"
+st.secrets["AIzaSyBaw3t0XXoaHhmWBmlzMxr-CwL5dstJZvo"]
+            TAVILY_KEY = "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"
 
 client = genai.Client(api_key=GEMINI_KEY)
 search_tool = TavilySearchResults(tavily_api_key=TAVILY_KEY)
